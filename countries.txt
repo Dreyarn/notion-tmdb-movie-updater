@@ -1,0 +1,16 @@
+{
+ "United States of America": "EEUU",
+ "Germany": "Alemania",
+ "Italy": "Italia",
+ "Japan": "Japón",
+ "United Kingdom": "UK",
+ "Malaysia": "Malasia",
+ "Greece": "Grecia",
+ "Spain": "España",
+ "South Korea": "Korea",
+ "Sweden": "Suecia",
+ "Ireland": "Irlanda",
+ "Belgium": "Bélgica",
+ "France": "Francia",
+ "Canada": "Canadá"
+}

@@ -1,0 +1,14 @@
+{
+ "Horror": "Terror",
+ "Comedy": "Comedia",
+ "Fantasy": "Fantasía",
+ "Science Fiction": "CiFi",
+ "Suspense": "Thriller",
+ "Adventure": "Aventuras",
+ "Mystery": "Misterio",
+ "Mistery": "Misterio",
+ "Action": "Acción",
+ "Crime": "Crimen",
+ "Animation": "Animación",
+ "History": "Histórica"
+}
