@@ -58,7 +58,7 @@ def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict
                     "rich_text": [{"type": "text", "text": {"content": ', '.join(directors)}}]
                 },
                 YEAR_PROPERTY: {
-                    "rich_text": [{"type": "number", "text": {"content": year}}]
+                    "number": year
                 },
                 OVERVIEW_PROPERTY: {
                     "rich_text": [{"type": "text", "text": {"content": overview}}]
@@ -105,7 +105,7 @@ def get_poster_url(movie_details):
 
 def get_release_date(movie_details):
     release_date = movie_details["release_date"]
-    year = release_date.split("-")[0]
+    year = int(release_date.split("-")[0])
     return release_date, year
 
 
