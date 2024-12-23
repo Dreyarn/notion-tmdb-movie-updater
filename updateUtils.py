@@ -23,6 +23,35 @@ def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict
     imdb_url = get_imdb_url(movie_details)
     tmdb_url = get_tmdb_url(movie_details)
 
+    print_log(directors, new_title, original_title, runtime, translated_countries, translated_genres, year)
+
+    if apply_changes:
+        notion.pages.update(
+            movie_db_data['id'],
+            icon={"external": {"url": poster_url}},
+            cover={"external": {"url": poster_url}},
+            properties={
+                TITLE_PROPERTY: {"title": build_rich_text_data(new_title)},
+                ORIGINAL_TITLE_PROPERTY: {"rich_text": build_rich_text_data(original_title)},
+                RUNTIME_PROPERTY: {"rich_text": build_rich_text_data(runtime)},
+                DIRECTOR_PROPERTY: {"rich_text": build_rich_text_data(', '.join(directors))},
+                YEAR_PROPERTY: {"number": year},
+                OVERVIEW_PROPERTY: {"rich_text": build_rich_text_data(overview)},
+                RELEASE_DATE_PROPERTY: {"date": {"start": release_date}},
+                IMDB_LINK_PROPERTY: {"url": imdb_url},
+                TMDB_LINK_PROPERTY: {"url": tmdb_url},
+                LOADED_PROPERTY: {"checkbox": True},
+                GENRES_PROPERTY: {"multi_select": translated_genres},
+                COUNTRIES_PROPERTY: {"multi_select": translated_countries}
+            }
+        )
+
+
+def build_rich_text_data(text):
+    return [{"type": "text", "text": {"content": text}}]
+
+
+def print_log(directors, new_title, original_title, runtime, translated_countries, translated_genres, year):
     print(f"    > {new_title} " + (f"({original_title})" if original_title else ''))
     print(f"    > {year}")
     print(f"    > {', '.join(directors)}")
@@ -30,59 +59,6 @@ def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict
     print(f"    > {', '.join([g['name'] for g in translated_genres])}")
     print(f"    > {', '.join([c['name'] for c in translated_countries])}")
     print()
-
-    if apply_changes:
-        notion.pages.update(
-            movie_db_data['id'],
-            icon={
-                "external": {
-                    "url": poster_url
-                }
-            },
-            cover={
-                "external": {
-                    "url": poster_url
-                }
-            },
-            properties={
-                TITLE_PROPERTY: {
-                    "title": [{"type": "text", "text": {"content": new_title}}]
-                },
-                ORIGINAL_TITLE_PROPERTY: {
-                    "rich_text": [{"type": "text", "text": {"content": original_title}}]
-                },
-                RUNTIME_PROPERTY: {
-                    "rich_text": [{"type": "text", "text": {"content": runtime}}]
-                },
-                DIRECTOR_PROPERTY: {
-                    "rich_text": [{"type": "text", "text": {"content": ', '.join(directors)}}]
-                },
-                YEAR_PROPERTY: {
-                    "number": year
-                },
-                OVERVIEW_PROPERTY: {
-                    "rich_text": [{"type": "text", "text": {"content": overview}}]
-                },
-                RELEASE_DATE_PROPERTY: {
-                    "date": {"start": release_date}
-                },
-                IMDB_LINK_PROPERTY: {
-                    "url": imdb_url
-                },
-                TMDB_LINK_PROPERTY: {
-                    "url": tmdb_url
-                },
-                LOADED_PROPERTY: {
-                    "checkbox": True
-                },
-                GENRES_PROPERTY: {
-                    "multi_select": translated_genres
-                },
-                COUNTRIES_PROPERTY: {
-                    "multi_select": translated_countries
-                }
-            }
-        )
 
 
 def get_tmdb_url(movie_details):

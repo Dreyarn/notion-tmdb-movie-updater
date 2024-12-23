@@ -48,15 +48,11 @@ def get_database():
     next_cursor = None
 
     while has_more:
-        params = {
-            "database_id": DATABASE_ID
-        }
+        params = {"database_id": DATABASE_ID}
         if filter_loaded:
             params["filter"] = {
                 "property": LOADED_PROPERTY,
-                "checkbox": {
-                    "equals": False
-                }
+                "checkbox": {"equals": False}
             }
 
         if next_cursor is not None:
@@ -72,7 +68,7 @@ def get_database():
     return db_rows
 
 
-def get_tmdb_movie_data_from_title(title):
+def retrieve_tmdb_movie_from_title(title):
     m = Movie()
     result = m.search(title)
     details = {}
@@ -82,7 +78,7 @@ def get_tmdb_movie_data_from_title(title):
     return details
 
 
-def get_tmdb_movie_data_from_id(movie_id):
+def retrieve_tmdb_movie_from_id(movie_id):
     m = Movie()
     result = m.details(movie_id)
     details = {}
@@ -94,42 +90,38 @@ def get_tmdb_movie_data_from_id(movie_id):
 
 def get_movie_title(db_data):
     movie_title = ''
-    movie_title_field = db_data['properties']['Título']['title']
+    movie_title_field = db_data['properties'][TITLE_PROPERTY]['title']
     if movie_title_field:
         movie_title = movie_title_field[0]['plain_text']
     return movie_title
 
 
 def parse_imdb_id(db_data):
-    imdb_url = db_data['properties']['IMDb']['url']
-    imdb_id = re.sub('/(.*)', '', re.sub('(.*)title/', '', imdb_url)) if imdb_url else None
-    return imdb_id
+    imdb_url = db_data['properties'][IMDB_LINK_PROPERTY]['url']
+    return re.sub('/(.*)', '', re.sub('(.*)title/', '', imdb_url)) if imdb_url else None
 
 
 def parse_tmdb_id(db_data):
-    tmdb_url = db_data['properties']['TMDB']['url']
-    tmdb_id = re.sub('-(.*)', '', re.sub('(.*)movie/', '', tmdb_url)) if tmdb_url else None
-    return tmdb_id
+    tmdb_url = db_data['properties'][TMDB_LINK_PROPERTY]['url']
+    return re.sub('-(.*)', '', re.sub('(.*)movie/', '', tmdb_url)) if tmdb_url else None
 
 
-def get_movie_tmdb_details(db_data, title):
+def retrieve_movie_details(db_data, title):
     imdb_id = parse_imdb_id(db_data)
     tmdb_id = parse_tmdb_id(db_data)
 
     print(f"Searching info for movie '{title}' (imdb: '{imdb_id}', tmdb: '{tmdb_id}')...")
 
-    search_id = tmdb_id or imdb_id
-
-    if search_id:
-        details = get_tmdb_movie_data_from_id(search_id)
+    if tmdb_id or imdb_id:
+        details = retrieve_tmdb_movie_from_id(tmdb_id or imdb_id)
     else:
-        details = get_tmdb_movie_data_from_title(title)
+        details = retrieve_tmdb_movie_from_title(title)
     return details
 
 
 def process_movie(db_data):
     title = get_movie_title(db_data)
-    details = get_movie_tmdb_details(db_data, title)
+    details = retrieve_movie_details(db_data, title)
 
     if details:
         updateUtils.update_movie(notion, db_data, details, title, genre_dict, country_dict, apply_changes)
