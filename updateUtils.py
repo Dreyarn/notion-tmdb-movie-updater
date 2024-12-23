@@ -58,7 +58,7 @@ def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict
                     "rich_text": [{"type": "text", "text": {"content": ', '.join(directors)}}]
                 },
                 YEAR_PROPERTY: {
-                    "rich_text": [{"type": "text", "text": {"content": year}}]
+                    "rich_text": [{"type": "number", "text": {"content": year}}]
                 },
                 OVERVIEW_PROPERTY: {
                     "rich_text": [{"type": "text", "text": {"content": overview}}]
