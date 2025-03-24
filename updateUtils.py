@@ -58,7 +58,6 @@ def print_log(directors, new_title, original_title, runtime, translated_countrie
     print(f"    > {runtime}")
     print(f"    > {', '.join([g['name'] for g in translated_genres])}")
     print(f"    > {', '.join([c['name'] for c in translated_countries])}")
-    print()
 
 
 def get_tmdb_url(movie_details):

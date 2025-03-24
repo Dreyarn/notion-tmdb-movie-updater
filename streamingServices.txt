@@ -1,0 +1,11 @@
+{
+ "Amazon Prime Video": "Amazon Prime Video",
+ "Filmin": "Filmin",
+ "Netflix": "Netflix",
+ "Max": "Max",
+ "Disney Plus": "Disney+",
+ "Crunchyroll": "Crunchyroll",
+ "Apple TV+": "Apple TV+",
+ "Movistar Plus+": "Movistar+",
+ "Cinema": "Cines"
+}
