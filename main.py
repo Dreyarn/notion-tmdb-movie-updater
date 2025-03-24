@@ -28,6 +28,7 @@ country_dict = {}
 apply_changes = True
 filter_loaded = True
 only_streaming = False
+only_pending = False
 
 
 #######################
