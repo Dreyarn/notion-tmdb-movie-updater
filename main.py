@@ -125,7 +125,7 @@ def retrieve_movie_details(db_data, title, index, database_size):
     imdb_id = parse_imdb_id(db_data)
     tmdb_id = parse_tmdb_id(db_data)
 
-    print(f"[{index}/{database_size}] Processing '{title}' (imdb: '{imdb_id}', tmdb: '{tmdb_id}')...")
+    print(f"    > imdb: '{imdb_id}', tmdb: '{tmdb_id}'")
 
     if tmdb_id or imdb_id:
         details = retrieve_tmdb_movie_from_id(tmdb_id or imdb_id)
@@ -139,6 +139,8 @@ def retrieve_movie_details(db_data, title, index, database_size):
 def process_movie(db_data, index, database_size):
     title = get_movie_title(db_data)
     details = {}
+
+    print(f"[{index}/{database_size}] Processing '{title}'...")
     if not only_streaming:
         details = retrieve_movie_details(db_data, title, index, database_size)
         if details:
@@ -179,7 +181,7 @@ def apply_arguments():
         print("==== Full run: full database will be parsed ====")
     if args.Streaming:
         only_streaming = True
-        print("=== Only streaming services will be uploaded ===")
+        print("==== Only streaming services will be updated ===")
     if args.Pending:
         only_pending = True
         print("===== Pending only: only unwatched movies ======")

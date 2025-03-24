@@ -52,7 +52,8 @@ def build_rich_text_data(text):
 
 
 def print_log(directors, new_title, original_title, runtime, translated_countries, translated_genres, year):
-    print(f"    > {new_title} " + (f"({original_title})" if original_title else ''))
+    if original_title:
+        print(f"    > ({original_title})")
     print(f"    > {year}")
     print(f"    > {', '.join(directors)}")
     print(f"    > {runtime}")
