@@ -5,7 +5,9 @@ import re
 from notion_client import Client
 from tmdbv3api import Movie
 from tmdbv3api import TMDb
+from tmdbv3api import Search
 
+import updateStreamingServices
 import updateUtils
 from constants import *
 
@@ -17,12 +19,14 @@ tmdb.api_key = TMDB_ACCESS_KEY
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--Test", help="Test run", action="store_true")
 parser.add_argument("-f", "--Full", help="Full database", action="store_true")
+parser.add_argument("-s", "--Streaming", help="Update only streaming services", action="store_true")
 genre_dict = {}
 country_dict = {}
 
 #######################
 apply_changes = True
 filter_loaded = True
+only_streaming = False
 
 
 #######################
@@ -69,11 +73,10 @@ def get_database():
 
 
 def retrieve_tmdb_movie_from_title(title):
-    m = Movie()
-    result = m.search(title)
+    result = Search.movies(title)
     details = {}
-    if result:
-        details = m.details(result[0]['id'])
+    if result and result.total_results > 0:
+        details = result.details(result[0]['id'])
 
     return details
 
@@ -110,21 +113,26 @@ def retrieve_movie_details(db_data, title):
     imdb_id = parse_imdb_id(db_data)
     tmdb_id = parse_tmdb_id(db_data)
 
-    print(f"Searching info for movie '{title}' (imdb: '{imdb_id}', tmdb: '{tmdb_id}')...")
+    print(f"Processing '{title}' (imdb: '{imdb_id}', tmdb: '{tmdb_id}')...")
 
     if tmdb_id or imdb_id:
         details = retrieve_tmdb_movie_from_id(tmdb_id or imdb_id)
     else:
         details = retrieve_tmdb_movie_from_title(title)
+    if not details:
+        print("    ! Not found! Try changing the name or manually entering the IMDB/TMDB ids")
     return details
 
 
 def process_movie(db_data):
     title = get_movie_title(db_data)
-    details = retrieve_movie_details(db_data, title)
+    details = {}
+    if not only_streaming:
+        details = retrieve_movie_details(db_data, title)
+        if details:
+            updateUtils.update_movie(notion, db_data, details, title, genre_dict, country_dict, apply_changes)
 
-    if details:
-        updateUtils.update_movie(notion, db_data, details, title, genre_dict, country_dict, apply_changes)
+    updateStreamingServices.update_streaming_services(notion, db_data, details, title, apply_changes)
 
 
 def update_notion_films():
@@ -147,14 +155,17 @@ def apply_arguments():
     args = parser.parse_args()
     if args.Test:
         apply_changes = False
-        print("=== Test run: changes will not be applied  ===")
+        print("==== Test run: changes will not be applied  ====")
     else:
-        print("==== Normal run: changes will be applied  ====")
+        print("===== Normal run: changes will be applied  =====")
     if args.Full:
         filter_loaded = False
-        print("=== Full run: full database will be parsed ===")
+        print("==== Full run: full database will be parsed ====")
+    if args.Streaming:
+        only_streaming = True
+        print("=== Only streaming services will be uploaded ===")
     else:
-        print("=== Partial run: only 'not loaded' entries ===")
+        print("==== Partial run: only 'not loaded' entries ====")
     print()
 
 
