@@ -170,8 +170,8 @@ def process_movie(db_data, index, database_size):
         details = retrieve_movie_details(db_data, title, index, database_size)
         if details:
             updateUtils.update_movie(notion, db_data, details, title, genre_dict, country_dict, apply_changes)
-
-    updateStreamingServices.update_streaming_services(notion, db_data, details, title, apply_changes)
+    else:
+        updateStreamingServices.update_streaming_services(notion, db_data, title, apply_changes)
     print()
 
 

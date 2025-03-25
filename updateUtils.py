@@ -1,5 +1,7 @@
 from constants import *
 
+import updateStreamingServices
+
 poster_base_url = 'https://image.tmdb.org/t/p/w600_and_h900_bestv2/%s'
 imdb_base_url = 'https://www.imdb.com/title/%s'
 tmdb_base_url = 'https://www.themoviedb.org/movie/%s'
@@ -23,7 +25,9 @@ def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict
     imdb_url = get_imdb_url(movie_details)
     tmdb_url = get_tmdb_url(movie_details)
 
-    print_log(directors, new_title, original_title, runtime, translated_countries, translated_genres, year)
+    print_log(directors, new_title, orginal_title, runtime, translated_countries, translated_genres, year)
+
+    streaming_services = updateStreamingServices.get_streaming_services_data(new_title)
 
     if apply_changes:
         notion.pages.update(
@@ -42,7 +46,8 @@ def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict
                 TMDB_LINK_PROPERTY: {"url": tmdb_url},
                 LOADED_PROPERTY: {"checkbox": True},
                 GENRES_PROPERTY: {"multi_select": translated_genres},
-                COUNTRIES_PROPERTY: {"multi_select": translated_countries}
+                COUNTRIES_PROPERTY: {"multi_select": translated_countries},
+                AVAILABILITY_PROPERTY: {"multi_select": streaming_services}
             }
         )
 

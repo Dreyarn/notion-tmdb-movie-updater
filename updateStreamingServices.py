@@ -5,17 +5,8 @@ from simplejustwatchapi.justwatch import search
 from constants import *
 
 
-def update_streaming_services(notion, movie_db_data, movie_details, title, apply_changes):
-    streaming_services_data = load_streaming_services_dict()
-    if movie_details:
-        title = movie_details['title']
-    jw_results = search(title, JW_COUNTRY, JW_LANGUAGE, 1, True)
-    if not jw_results:
-        return
-
-    streaming_offers = parse_streaming_offers(jw_results, streaming_services_data)
-
-    streaming_offers_data = [{'name': s} for s in streaming_offers]
+def update_streaming_services(notion, movie_db_data, title, apply_changes):
+    streaming_offers_data = get_streaming_services_data(title)
 
     if apply_changes:
         notion.pages.update(
@@ -24,7 +15,17 @@ def update_streaming_services(notion, movie_db_data, movie_details, title, apply
                 AVAILABILITY_PROPERTY: {"multi_select": streaming_offers_data},
             }
         )
-        print(f"    > Available on: {', '.join(streaming_offers)}")
+
+def get_streaming_services_data(title):
+    streaming_services_data = load_streaming_services_dict()
+    jw_results = search(title, JW_COUNTRY, JW_LANGUAGE, 1, True)
+    if not jw_results:
+        return
+
+    streaming_offers = parse_streaming_offers(jw_results, streaming_services_data)
+
+    streaming_offers_data = [{'name': s} for s in streaming_offers]
+    print(f"    > Available on: {', '.join(streaming_offers)}")
 
 
 def parse_streaming_offers(jw_results, streaming_services_dict):
