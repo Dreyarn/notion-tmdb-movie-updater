@@ -103,7 +103,6 @@ def build_notion_db_filter():
             "checkbox": {"equals": False}
         }
         filters.append(archived_filter)
-        print ("Filter: Only unarchived movies")
 
     if filters:
         if len(filters) == 1: return filters[0]
