@@ -21,18 +21,20 @@ parser.add_argument("-t", "--Test", help="Test run", action="store_true")
 parser.add_argument("-f", "--Full", help="Full database", action="store_true")
 parser.add_argument("-s", "--Streaming", help="Update only streaming services", action="store_true")
 parser.add_argument("-p", "--Pending", help="Update only movies pending viewing", action="store_true")
+parser.add_argument("-a", "--Archived", help="Include archived movies", action="store_true")
+parser.add_argument("-l", "--Loaded", help="Include loaded movies", action="store_true")
 genre_dict = {}
 country_dict = {}
 
 #######################
 apply_changes = True
-filter_loaded = True
 only_streaming = False
 only_pending = False
+skip_archived = True
+skip_loaded = True
 
 
 #######################
-
 
 def load_genre_dict():
     with open("genres.txt", encoding='UTF-8') as f:
@@ -52,23 +54,11 @@ def get_database():
     has_more = True
     db_rows = []
     next_cursor = None
+    db_filter = build_notion_db_filter()
 
     while has_more:
         params = {"database_id": DATABASE_ID}
-
-        if only_pending:
-            params["filter"] = {
-                "property": STATUS_PROPERTY,
-                "status": {
-                    "equals": UNWATCHED
-                }
-            }
-        else:
-            if filter_loaded:
-                params["filter"] = {
-                    "property": LOADED_PROPERTY,
-                    "checkbox": {"equals": False}
-                }
+        params['filter'] = db_filter
 
         if next_cursor is not None:
             params["start_cursor"] = next_cursor
@@ -81,6 +71,37 @@ def get_database():
         db_rows.extend(db_data['results'])
 
     return db_rows
+
+
+def build_notion_db_filter():
+    filters = []
+    if only_pending:
+        pending_filter = {
+            "property": STATUS_PROPERTY,
+            "status": {
+                "equals": UNWATCHED
+            }
+        }
+        filters.append(pending_filter)
+    else:
+        if skip_loaded:
+            loaded_filter = {
+                "property": LOADED_PROPERTY,
+                "checkbox": {"equals": False}
+            }
+            filters.append(loaded_filter)
+    if skip_archived:
+        archived_filter = {
+            "property": ARCHIVED_PROPERTY,
+            "checkbox": {"equals": False}
+        }
+        filters.append(archived_filter)
+        print ("Filter: Only unarchived movies")
+
+    if filters:
+        if len(filters) == 1: return filters[0]
+        else: return {"and": filters}
+    return
 
 
 def retrieve_tmdb_movie_from_title(title):
@@ -125,22 +146,26 @@ def retrieve_movie_details(db_data, title, index, database_size):
     imdb_id = parse_imdb_id(db_data)
     tmdb_id = parse_tmdb_id(db_data)
 
-    print(f"    > imdb: '{imdb_id}', tmdb: '{tmdb_id}'")
-
     if tmdb_id or imdb_id:
         details = retrieve_tmdb_movie_from_id(tmdb_id or imdb_id)
     else:
         details = retrieve_tmdb_movie_from_title(title)
+
     if not details:
         print("    (!) Not found. Try changing the name or manually entering the IMDB/TMDB ids")
+    else:
+        imdbid = details["imdb_id"]
+        tmdbid = details["id"]
+        print(f"    > imdb: '{imdbid}' -- tmdb: '{tmdbid}'")
+
     return details
 
 
 def process_movie(db_data, index, database_size):
-    title = get_movie_title(db_data)
+    title = get_movie_title(db_data).strip()
     details = {}
 
-    print(f"[{index}/{database_size}] Processing '{title}'...")
+    print(f"({index}/{database_size}) {title}")
     if not only_streaming:
         details = retrieve_movie_details(db_data, title, index, database_size)
         if details:
@@ -152,6 +177,9 @@ def process_movie(db_data, index, database_size):
 
 def update_notion_films():
     global genre_dict, country_dict
+    print("=====================================")
+    print("===  Pablo's Notion Film Updater  ===")
+    print("=====================================")
     apply_arguments()
 
     database = get_database()
@@ -169,29 +197,36 @@ def update_notion_films():
 
 
 def apply_arguments():
-    global apply_changes, filter_loaded, only_streaming, only_pending
+    global apply_changes, only_streaming, only_pending, skip_archived, skip_loaded
+    # Priority: Pending > Full > Loaded
     args = parser.parse_args()
     if args.Test:
         apply_changes = False
-        print("==== Test run: changes will not be applied =====")
-    else:
-        print("===== Normal run: changes will be applied ======")
-    if args.Full:
-        filter_loaded = False
-        print("==== Full run: full database will be parsed ====")
+        print("(*)  Test run:  Changes will not be applied")
     if args.Streaming:
         only_streaming = True
-        print("==== Only streaming services will be updated ===")
+        print("(*) Streaming:  Only streaming services will be updated")
     if args.Pending:
         only_pending = True
-        print("===== Pending only: only unwatched movies ======")
+        skip_loaded = False
+        print("(*)   Pending:  Process all unwatched movies")
+    if args.Archived and not args.Full:
+        skip_archived = False
+        print("(*)  Archived:  Archived movies will be included")
+    if args.Full:
+        skip_archived = False
+        skip_loaded = False
+        print("(*)  Full run:  Full database will be processed")
     else:
-        print("==== Partial run: only 'not loaded' entries ====")
+        if args.Loaded:
+            skip_loaded = False
+            print("(*)    Loaded:  Loaded movies will be included")
+    if skip_loaded and skip_archived and not only_pending:
+            print("(*)   Default:  Only 'not loaded' and 'not archived' movies'")
     print()
 
 
 if __name__ == '__main__':
-    filter_loaded = True
     apply_changes = True
 
     update_notion_films()
