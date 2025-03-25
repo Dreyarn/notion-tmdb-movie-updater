@@ -27,7 +27,7 @@ def update_streaming_services(notion, movie_db_data, movie_details, title, apply
         print(f"    > Available on: {', '.join(streaming_offers)}")
 
 
-def parse_streaming_offers(jw_results, streaming_services_data):
+def parse_streaming_offers(jw_results, streaming_services_dict):
     offers = jw_results[0].offers
     streaming_offers = [offer.package.name for offer in offers if offer.monetization_type == 'FLATRATE']
 
@@ -35,9 +35,11 @@ def parse_streaming_offers(jw_results, streaming_services_data):
        streaming_offers.append("Cinema")
 
     if streaming_offers:
-        streaming_offers = [streaming_services_data.get(s) for s in streaming_offers if streaming_services_data.get(s)]
-    else:
+        streaming_offers = [streaming_services_dict.get(s) for s in streaming_offers if streaming_services_dict.get(s)]
+
+    if not streaming_offers:
         streaming_offers = ['🏴‍☠️']
+
     return streaming_offers
 
 
