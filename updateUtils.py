@@ -25,7 +25,7 @@ def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict
     imdb_url = get_imdb_url(movie_details)
     tmdb_url = get_tmdb_url(movie_details)
 
-    print_log(directors, new_title, orginal_title, runtime, translated_countries, translated_genres, year)
+    print_log(directors, new_title, original_title, runtime, translated_countries, translated_genres, year)
 
     streaming_services = updateStreamingServices.get_streaming_services_data(new_title)
 
