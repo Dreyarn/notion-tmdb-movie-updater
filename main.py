@@ -50,6 +50,13 @@ def load_country_dict():
     return json.loads(country_data)
 
 
+def load_streaming_services_dict():
+    with open("streamingServices.txt", encoding='UTF-8') as f:
+        streaming_services_data = f.read()
+
+    return json.loads(streaming_services_data)
+
+
 def get_database():
     has_more = True
     db_rows = []
@@ -169,14 +176,14 @@ def process_movie(db_data, index, database_size):
     if not only_streaming:
         details = retrieve_movie_details(db_data, title, index, database_size)
         if details:
-            updateUtils.update_movie(notion, db_data, details, title, genre_dict, country_dict, apply_changes)
+            updateUtils.update_movie(notion, db_data, details, title, genre_dict, country_dict, streaming_dict, apply_changes)
     else:
-        updateStreamingServices.update_streaming_services(notion, db_data, title, apply_changes)
+        updateStreamingServices.update_streaming_services(notion, db_data, title, streaming_dict, apply_changes)
     print()
 
 
 def update_notion_films():
-    global genre_dict, country_dict
+    global genre_dict, country_dict, streaming_dict
     print("=====================================")
     print("===  Pablo's Notion Film Updater  ===")
     print("=====================================")
@@ -185,6 +192,7 @@ def update_notion_films():
     database = get_database()
     genre_dict = load_genre_dict()
     country_dict = load_country_dict()
+    streaming_dict = load_streaming_services_dict()
     database_size = len(database)
     i = 1;
     for movie_db_data in database:

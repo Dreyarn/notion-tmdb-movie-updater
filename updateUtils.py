@@ -8,7 +8,7 @@ tmdb_base_url = 'https://www.themoviedb.org/movie/%s'
 ignored_genres = ['Family']
 
 
-def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict, country_dict, apply_changes):
+def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict, country_dict, streaming_dict, apply_changes):
     original_title = get_original_title(movie_details)
     overview, translated_title = load_spanish_data(movie_details, original_title)
     new_title = current_title or translated_title or original_title
@@ -27,7 +27,7 @@ def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict
 
     print_log(directors, new_title, original_title, runtime, translated_countries, translated_genres, year)
 
-    streaming_services = updateStreamingServices.get_streaming_services_data(new_title)
+    streaming_services = updateStreamingServices.get_streaming_services_data(new_title, streaming_dict)
 
     if apply_changes:
         notion.pages.update(
@@ -47,7 +47,7 @@ def update_movie(notion, movie_db_data, movie_details, current_title, genre_dict
                 LOADED_PROPERTY: {"checkbox": True},
                 GENRES_PROPERTY: {"multi_select": translated_genres},
                 COUNTRIES_PROPERTY: {"multi_select": translated_countries},
-                AVAILABILITY_PROPERTY: {"multi_select": streaming_services}
+                AVAILABILITY_PROPERTY: streaming_services and {"multi_select": streaming_services}
             }
         )
 
