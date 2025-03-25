@@ -191,9 +191,11 @@ def update_notion_films():
         process_movie(movie_db_data, i, database_size)
         i += 1
     if apply_changes:
-        print(f"=== {database_size} database rows processed and updated ===")
+        print("============================================================")
+        print(f"=== {database_size} database rows processed and updated")
     else:
-        print(f"========= {database_size} database rows processed =========")
+        print("============================================================")
+        print(f"=== {database_size} database rows processed")
 
 
 def apply_arguments():
@@ -223,6 +225,7 @@ def apply_arguments():
             print("(*)    Loaded:  Loaded movies will be included")
     if skip_loaded and skip_archived and not only_pending:
             print("(*)   Default:  Only 'not loaded' and 'not archived' movies'")
+    print("------------------------------------------------------------")
     print()
 
 
